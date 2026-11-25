@@ -1,0 +1,700 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Suite Técnica Torres Unidas • Plataforma Unificada</title>
+  <link href="https://googleapis.com" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://jsdelivr.net" defer></script>
+  <script src="https://jsdelivr.net" defer></script>
+  <script src="https://unpkg.com" defer></script>
+  <script src="https://jsdelivr.net" defer></script>
+  <style>
+    .container { max-width: 1480px !important; }
+    .tabs { grid-template-columns: repeat(7, 1fr) !important; }
+    @media (max-width: 1050px) { .tabs { grid-template-columns: repeat(3, 1fr) !important; } }
+    @media (max-width: 560px) { .tabs { grid-template-columns: repeat(2, 1fr) !important; } }
+    .tab-btn.tab-highlight { border-color: #1d4ed8; color: #1d4ed8; background: #eff6ff; }
+    .tab-btn.tab-highlight.active { background: #1d4ed8; color: #ffffff; }
+    .unifilar-grid { display: grid; grid-template-columns: 410px 1fr; gap: 16px; align-items: start; }
+    @media (max-width: 980px) { .unifilar-grid { grid-template-columns: 1fr; } }
+    .panel-box { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; padding: 12px; margin-bottom: 12px; }
+    .panel-box h3 { margin: 0 0 8px; font-size: 13px; color: #0f172a; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; text-transform: uppercase; }
+    .g2-sm { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .g3-sm { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+    .chip-btn { background: #e0f2fe; color: #0369a1; border: 1px solid #7dd3fc; padding: 5px 8px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; }
+    .chip-btn:hover { background: #bae6fd; }
+    .pano-grid-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 14px; margin-top: 12px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header class="app-header">
+    <div class="header-row">
+      <div>
+        <h1>Generador de Esquemas Técnicos • Torres Unidas</h1>
+        <p class="sub">SPAT • Perímetro • 14 Modelos de Torre • Equipos • Ruta • Tableros (Plumón) • Panorámica 360°</p>
+      </div>
+      <div class="header-actions-top">
+        <button type="button" id="btnNuevoSitioConBase" class="btn-action btn-secondary">Nuevo Sitio (Usar Plantilla)</button>
+        <button type="button" id="btnDescargarTodoLote" class="btn-action btn-primary">Descargar Todo (F10)</button>
+        <button type="button" id="btnResetTodo" class="btn-action btn-ghost">Restablecer</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="shared-site-bar">
+    <div class="shared-bar-grid-4">
+      <div class="field">
+        <label for="sitio">CÓDIGO / NOMBRE DEL SITIO (Todas las pestañas)</label>
+        <input type="text" id="sitio" value="LI0123_SITIO" oninput="syncExtraTabs()" />
+      </div>
+      <div class="field">
+        <label for="globalTipoTorre">TIPO DE TORRE (Sincroniza Pestañas 1, 2, 3 y 4)</label>
+        <select id="globalTipoTorre">
+          <option value="arbol">1. Torre público tipo árbol</option>
+          <option value="monopolo">2. Torre monopolo (3 roldanas)</option>
+          <option value="autosoportada_normal">3. Autosoportada (roldana normal)</option>
+          <option value="arriostrada_escalera_gato">4. Arriostrada con escalera gato</option>
+          <option value="ventada_edificio">5. Ventada con edificio</option>
+          <option value="ventada_piso">6. Ventada de piso</option>
+          <option value="autosoportada_encima">7. Autosoportada (roldana encima)</option>
+          <option value="arriostrada_edificio_normal">8. Arriostrada con edificio normal</option>
+          <option value="autosoportada_sin_roldana">9. Autosoportada sin roldana</option>
+          <option value="estructura_especial">10. Torre estructura especial</option>
+          <option value="autosoportada_rooftop">11. Autosoportada rooftop</option>
+          <option value="monopolo_1_roldana">12. Monopolo 1 roldana</option>
+          <option value="monopolo_2_roldanas">13. Monopolo 2 roldanas</option>
+          <option value="monoposte">14. Torre monoposte</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="globalAlturaTorre">ALTURA TOTAL TORRE (m)</label>
+        <input type="number" id="globalAlturaTorre" value="30.00" step="0.01" />
+      </div>
+      <div class="shared-sync-badge">7 Pestañas Sincronizadas</div>
+    </div>
+  </div>
+
+  <nav class="tabs" role="tablist">
+    <button type="button" class="tab-btn active" data-tab="tabSpat" role="tab" aria-selected="true">1. F12M - SPAT</button>
+    <button type="button" class="tab-btn" data-tab="tabPerimetro" role="tab" aria-selected="false">2. Esquema 1 - Perímetro</button>
+    <button type="button" class="tab-btn" data-tab="tabTorre" role="tab" aria-selected="false">3. Esquema 2 - Torre</button>
+    <button type="button" class="tab-btn" data-tab="tabEquipos" role="tab" aria-selected="false">4. Equipos en Torre</button>
+    <button type="button" class="tab-btn" data-tab="tabRuta" role="tab" aria-selected="false">5. Ruta al Sitio</button>
+    <button type="button" class="tab-btn tab-highlight" data-tab="tabTableros" role="tab" aria-selected="false">6. Tableros (Plumón)</button>
+    <button type="button" class="tab-btn tab-highlight" data-tab="tabPano360" role="tab" aria-selected="false">7. Panorámica & 360°</button>
+  </nav>
+
+  <!-- PESTAÑA 1: SPAT -->
+  <section id="tabSpat" class="tab-panel active">
+    <div id="avisoSpat" class="notice" hidden></div>
+    <div class="grid-form">
+      <div class="field"><label for="spatTipoTorre">Símbolo de Torre</label>
+        <select id="spatTipoTorre">
+          <option value="auto_cuadrado">Autosoportada (Cuadrada)</option><option value="auto_triangulo">Autosoportada (Triangular)</option>
+          <option value="monopolo">Monopolo / Árbol</option><option value="ventada">Ventada</option><option value="arriostrada">Arriostrada</option>
+        </select>
+      </div>
+      <div class="field"><label for="cantidadPozos">Cantidad de Pozos (PT)</label>
+        <select id="cantidadPozos">
+          <option value="1">1 Pozo (PT01)</option><option value="2">2 Pozos (PT01 - PT02)</option>
+          <option value="3" selected>3 Pozos (PT01 - PT03)</option><option value="4">4 Pozos (PT01 - PT04)</option>
+          <option value="5">5 Pozos (PT01 - PT05)</option><option value="6">6 Pozos (PT01 - PT06)</option>
+        </select>
+      </div>
+      <div class="field"><label for="val50">Medición 50% - 15 MTS (OHMS)</label><input type="number" id="val50" value="2.15" step="0.01"></div>
+      <div class="field"><label for="val60">Medición 60% - 18 MTS (OHMS)</label><input type="number" id="val60" value="2.20" step="0.01"></div>
+      <div class="field"><label for="val70">Medición 70% - 21 MTS (OHMS)</label><input type="number" id="val70" value="2.28" step="0.01"></div>
+    </div>
+    <div class="actions">
+      <button type="button" id="btnActualizarSpat" class="btn-action btn-secondary">Actualizar Vista</button>
+      <button type="button" id="btnDescargarSpat" class="btn-action btn-primary">Descargar PNG (SPAT)</button>
+    </div>
+    <div class="canvas-wrap"><canvas id="canvasSpat" width="960" height="980"></canvas></div>
+  </section>
+
+  <!-- PESTAÑA 2: PERÍMETRO -->
+  <section id="tabPerimetro" class="tab-panel" hidden>
+    <div id="avisoPerimetro" class="notice" hidden></div>
+    <div class="grid-form">
+      <div class="field"><label for="perAncho">Ancho Horizontal (MTS)</label><input type="number" id="perAncho" value="8.10" step="0.01"></div>
+      <div class="field"><label for="perLargo">Largo Vertical (MTS)</label><input type="number" id="perLargo" value="10.00" step="0.01"></div>
+      <div class="field"><label for="perTipoTorre">Símbolo de Torre</label>
+        <select id="perTipoTorre">
+          <option value="auto_cuadrado">Autosoportada (Cuadrada)</option><option value="auto_triangulo">Autosoportada (Triangular)</option>
+          <option value="monopolo">Monopolo / Árbol</option><option value="ventada">Ventada</option><option value="arriostrada">Arriostrada</option>
+        </select>
+      </div>
+      <div class="field"><label for="perFormatoCoord">Formato de Coordenadas</label>
+        <select id="perFormatoCoord"><option value="gms">Grados, Minutos y Segundos (GMS)</option><option value="dec">Grados Decimales</option></select>
+      </div>
+      <div class="field"><label for="coordA">Coordenada A (Sup. Izq.)</label><input type="text" id="coordA" value="11°51'52.24&quot;S 77°04'35.55&quot;W"></div>
+      <div class="field"><label for="coordB">Coordenada B (Sup. Der.)</label><input type="text" id="coordB" value="11°51'52.24&quot;S 77°04'35.29&quot;W"></div>
+      <div class="field"><label for="coordC">Coordenada C (Inf. Der.)</label><input type="text" id="coordC" value="11°51'52.55&quot;S 77°04'35.28&quot;W"></div>
+      <div class="field"><label for="coordD">Coordenada D (Inf. Izq.)</label><input type="text" id="coordD" value="11°51'52.56&quot;S 77°04'35.55&quot;W"></div>
+    </div>
+    <div class="actions">
+      <button type="button" id="btnConvertirCoordsGMS" class="btn-action btn-ghost">Formatear a GMS</button>
+      <button type="button" id="btnActualizarPer" class="btn-action btn-secondary">Actualizar Vista</button>
+      <button type="button" id="btnDescargarPer" class="btn-action btn-primary">Descargar PNG (Perímetro)</button>
+    </div>
+    <div class="canvas-wrap"><canvas id="canvasPerimetro" width="960" height="740"></canvas></div>
+  </section>
+  <!-- PESTAÑA 3: TORRE -->
+  <section id="tabTorre" class="tab-panel" hidden>
+    <div id="avisoTorre" class="notice" hidden></div>
+    <div class="grid-form">
+      <div class="field"><label for="torreTipo">Modelo de Torre (14 tipos)</label>
+        <select id="torreTipo">
+          <option value="arbol">1. Torre público tipo árbol</option><option value="monopolo">2. Torre monopolo (3 roldanas)</option>
+          <option value="autosoportada_normal">3. Torre autosoportada (roldana normal)</option><option value="arriostrada_escalera_gato">4. Torre arriostrada con escalera gato</option>
+          <option value="ventada_edificio">5. Torre ventada con edificio</option><option value="ventada_piso">6. Torre ventada de piso</option>
+          <option value="autosoportada_encima">7. Torre autosoportada (roldana encima)</option><option value="arriostrada_edificio_normal">8. Torre arriostrada con edificio normal</option>
+          <option value="autosoportada_sin_roldana">9. Torre autosoportada sin roldana</option><option value="estructura_especial">10. Torre estructura especial</option>
+          <option value="autosoportada_rooftop">11. Torre autosoportada rooftop</option><option value="monopolo_1_roldana">12. Torre monopolo 1 roldana</option>
+          <option value="monopolo_2_roldanas">13. Torre monopolo 2 roldanas</option><option value="monoposte">14. Torre monoposte</option>
+        </select>
+      </div>
+      <div class="field"><label for="alturaTorre">Altura Torre + Base (m)</label><input type="number" id="alturaTorre" value="30.00" step="0.01"></div>
+      <div class="field"><label for="alturaBase">Altura Base / Pedestal (m)</label><input type="number" id="alturaBase" value="1.20" step="0.01"></div>
+      <div class="field grp-roldana-std"><label for="roldanaSup">Altura Roldana Superior (m)</label><input type="number" id="roldanaSup" value="28.50" step="0.01"></div>
+      <div class="field grp-roldana-std"><label for="roldanaInf">Altura Roldana Inferior (m)</label><input type="number" id="roldanaInf" value="27.30" step="0.01"></div>
+      <div class="field grp-monopolo" hidden><label for="rol1Sup">Roldana 1 Sup (m)</label><input type="number" id="rol1Sup" value="29.00" step="0.01"></div>
+      <div class="field grp-monopolo" hidden><label for="rol1Inf">Roldana 1 Inf (m)</label><input type="number" id="rol1Inf" value="27.80" step="0.01"></div>
+      <div class="field grp-monopolo" hidden><label for="rol2Sup">Roldana 2 Sup (m)</label><input type="number" id="rol2Sup" value="26.00" step="0.01"></div>
+      <div class="field grp-monopolo" hidden><label for="rol2Inf">Roldana 2 Inf (m)</label><input type="number" id="rol2Inf" value="24.80" step="0.01"></div>
+      <div class="field grp-monopolo" hidden><label for="rol3Sup">Roldana 3 Sup (m)</label><input type="number" id="rol3Sup" value="23.00" step="0.01"></div>
+      <div class="field grp-monopolo" hidden><label for="rol3Inf">Roldana 3 Inf (m)</label><input type="number" id="rol3Inf" value="21.80" step="0.01"></div>
+      <div class="field grp-escalera" hidden><label for="alturaEscaleraGato">Altura Escalera Gato (m)</label><input type="number" id="alturaEscaleraGato" value="2.40" step="0.01"></div>
+      <div class="field grp-edificio" hidden><label for="alturaEdificio">Altura Edificio (m)</label><input type="number" id="alturaEdificio" value="12.00" step="0.01"></div>
+      <div class="field"><label for="customTorreImg">Imagen base (opcional)</label><input type="file" id="customTorreImg" accept="image/*"></div>
+    </div>
+    <div class="actions">
+      <button type="button" id="btnActualizarTorre" class="btn-action btn-secondary">Actualizar Vista</button>
+      <button type="button" id="btnDescargarTorre" class="btn-action btn-primary">Descargar PNG (Torre)</button>
+      <button type="button" id="btnRestaurarImgTorre" class="btn-action btn-ghost" hidden>Restaurar Imagen Original</button>
+    </div>
+    <div class="canvas-wrap"><canvas id="canvasTorre" width="900" height="820"></canvas></div>
+  </section>
+
+  <!-- PESTAÑA 4: EQUIPOS EN TORRE -->
+  <section id="tabEquipos" class="tab-panel" hidden>
+    <div id="avisoEquipos" class="notice" hidden></div>
+    <div id="ocrStatusBar" class="ocr-bar" hidden></div>
+    <div class="grid-form">
+      <div class="field"><label for="equiposFotos">1. Subir Fotos Panorámicas (1 a 4 fotos)</label><input type="file" id="equiposFotos" accept="image/*" multiple></div>
+      <div class="field"><label for="equiposAlturaRef">Altura Máxima Torre (m)</label><input type="number" id="equiposAlturaRef" value="30.00" step="0.01"></div>
+      <div class="field"><label for="equiposAgrupar">Agrupar equipos a misma altura</label>
+        <select id="equiposAgrupar"><option value="si" selected>Sí (Ej. RRU 12-13-14)</option><option value="no">No (Individual)</option></select>
+      </div>
+      <div class="field"><label for="equiposFontSize">Tamaño Etiqueta Roja</label>
+        <select id="equiposFontSize"><option value="16">16 px</option><option value="20" selected>20 px</option><option value="24">24 px</option><option value="28">28 px</option></select>
+      </div>
+    </div>
+
+    <div class="equipos-box">
+      <div class="equipos-box-header">
+        <div><strong>2. Lista de Equipos según su Altura</strong></div>
+        <div class="equipos-quick-actions">
+          <label class="btn-action btn-ghost file-btn-label">Subir Excel / CSV / JPG<input type="file" id="inputExcelEquipos" accept=".xlsx,.xls,.csv,.txt,image/*" hidden></label>
+          <button type="button" id="btnPegarListaEquipos" class="btn-action btn-ghost">Pegar Lista</button>
+          <button type="button" id="btnPlantillasEquipos" class="btn-action btn-ghost">Plantillas Rápidas</button>
+          <button type="button" id="btnAjusteMasivoAlturas" class="btn-action btn-ghost">+/- Alturas</button>
+          <button type="button" id="btnAgregarEquipo" class="btn-action btn-secondary">+ Agregar Equipo</button>
+        </div>
+      </div>
+
+      <div id="panelAjusteAlturas" class="paste-panel" hidden>
+        <div class="actions" style="margin-bottom:0;">
+          <input type="number" id="inpDeltaAltura" value="3.00" step="0.1" style="width:110px;">
+          <button type="button" id="btnSumarDeltaAltura" class="btn-action btn-secondary">Sumar (+m)</button>
+          <button type="button" id="btnRestarDeltaAltura" class="btn-action btn-secondary">Restar (-m)</button>
+          <button type="button" id="btnEscalarProporcional" class="btn-action btn-primary">Escalar a Altura Torre</button>
+          <button type="button" id="btnCerrarAjusteAlturas" class="btn-action btn-ghost">Cerrar</button>
+        </div>
+      </div>
+
+      <div id="panelPlantillasEquipos" class="paste-panel" hidden>
+        <div class="actions" style="margin-bottom:0;">
+          <button type="button" class="btn-action btn-ghost btn-tpl" data-tpl="3sectores">3 Sectores Estándar</button>
+          <button type="button" class="btn-action btn-ghost btn-tpl" data-tpl="arbol">Monopolo / Árbol</button>
+          <button type="button" class="btn-action btn-ghost btn-tpl" data-tpl="autosoportada_full">Autosoportada Multi-operador</button>
+          <button type="button" id="btnCerrarPlantillas" class="btn-action btn-ghost">Cerrar</button>
+        </div>
+      </div>
+
+      <div id="panelPegarEquipos" class="paste-panel" hidden>
+        <textarea id="txtPegarEquipos" rows="4" placeholder="Pega líneas desde Excel..."></textarea>
+        <div class="actions" style="margin-top:8px; margin-bottom:0;">
+          <button type="button" id="btnProcesarPegadoEquipos" class="btn-action btn-primary">Importar Lista</button>
+          <button type="button" id="btnCerrarPegadoEquipos" class="btn-action btn-ghost">Cancelar</button>
+        </div>
+      </div>
+
+      <div class="equipos-list-header"><span>Equipo / Código</span><span>Altura (m)</span><span>Lado</span><span>Quitar</span></div>
+      <div id="listaEquiposContainer" class="equipos-list-container"></div>
+    </div>
+
+    <div class="smart-learning-box">
+      <div class="smart-learning-header">
+        <span id="lblResumenAprendizaje" style="font-size:12px; font-weight:bold;">Sitios aprendidos: 0</span>
+        <div class="actions" style="margin:0;">
+          <button type="button" id="btnAprenderSitioActual" class="btn-action btn-primary">Aprender Este Sitio</button>
+          <button type="button" id="btnAplicarAprendizajeAuto" class="btn-action btn-secondary">Auto-Acomodar Flechas</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="button" id="btnDescargarUnidaEquipos" class="btn-action btn-primary">Descargar Todo en 1 Imagen (PNG)</button>
+      <select id="equiposLayoutUnido" class="select-inline-action">
+        <option value="horizontal">Unir: Lado a lado (Horizontal)</option>
+        <option value="grid2x2">Unir: Cuadrícula (2x2)</option>
+        <option value="vertical">Unir: Vertical</option>
+      </select>
+      <button type="button" id="btnAutoDistribuirEquipos" class="btn-action btn-secondary">Recalcular Flechas</button>
+      <button type="button" id="btnAlinearMargenes" class="btn-action btn-ghost">Alinear en Margen</button>
+      <button type="button" id="btnToggleLockDrag" class="btn-action btn-ghost" aria-pressed="false">Bloquear Arrastre en Fotos</button>
+      <button type="button" id="btnLimpiarFotosEquipos" class="btn-action btn-ghost">Quitar Fotos</button>
+    </div>
+    <div id="galeriaEquipos" class="galeria-equipos"></div>
+  </section>
+
+  <!-- PESTAÑA 5: RUTA AL SITIO -->
+  <section id="tabRuta" class="tab-panel" hidden>
+    <div id="avisoRuta" class="notice" hidden></div>
+    <div class="grid-form">
+      <div class="field"><label for="rutaOrigen">1. Custodio de Llaves (Inicio)</label><input type="text" id="rutaOrigen" placeholder="Coordenadas o dirección"></div>
+      <div class="field"><label for="rutaDestino">2. Estación / Torre (Destino)</label><input type="text" id="rutaDestino"></div>
+    </div>
+    <div class="field" style="margin-bottom:10px;"><label for="rutaDetalleTexto">3. Detalle de la Ruta</label><textarea id="rutaDetalleTexto" rows="2"></textarea></div>
+    <div class="actions">
+      <button type="button" id="btnCalcularRuta" class="btn-action btn-secondary">Trazar Ruta y Generar Texto</button>
+      <button type="button" id="btnAbrirGoogleMaps" class="btn-action btn-ghost">Abrir en Google Maps</button>
+      <button type="button" id="btnRedibujarRuta" class="btn-action btn-ghost">Actualizar Imagen</button>
+      <button type="button" id="btnDescargarRuta" class="btn-action btn-primary">Descargar PNG Ruta</button>
+    </div>
+    <div class="ruta-editor-grid">
+      <div class="ruta-map-box"><div id="mapaRutaLeaflet" style="height:420px; border-radius:8px;"></div></div>
+      <div class="ruta-preview-box"><canvas id="canvasRutaFinal" width="960" height="620"></canvas></div>
+    </div>
+  </section>
+
+  <!-- PESTAÑA 6: DIAGRAMA DE TABLEROS (ESTILO PLUMÓN) -->
+  <section id="tabTableros" class="tab-panel" hidden>
+    <div class="actions" style="background:#f8fafc; padding:10px; border-radius:10px; border:1px solid #cbd5e1; justify-content:space-between;">
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button type="button" class="btn-action btn-ghost" onclick="applyTabPreset('MED_OP')">📋 Medidor → Tab. Operador Indep.</button>
+        <button type="button" class="btn-action btn-ghost" onclick="applyTabPreset('CAJA_PASE')">📦 Tab. Principal (Caja de Pase)</button>
+        <button type="button" class="btn-action btn-ghost" onclick="applyTabPreset('POSTE_TRAFO')">⚡ Poste Transformador (Sin Medidor)</button>
+        <button type="button" class="btn-action btn-ghost" onclick="applyTabPreset('2OP')">🏢 Estándar 2 Operadores</button>
+      </div>
+      <button type="button" class="btn-action btn-primary" onclick="descargarCanvas('cTab', '6_DIAGRAMA_TABLERO')">⬇ DESCARGAR PNG (TABLERO)</button>
+    </div>
+
+    <div class="unifilar-grid">
+      <div>
+        <div class="panel-box">
+          <h3>1. Visor de Foto (Tablero / Medidor)</h3>
+          <input type="file" id="tabPhotoIn" accept="image/*" multiple style="width:100%; font-size:12px;">
+          <div id="tabPhotoTabs" style="display:flex; gap:5px; flex-wrap:wrap; margin-top:6px;"></div>
+          <div id="tabPhotoBox" style="display:none; margin-top:8px; text-align:center; background:#0f172a; border-radius:6px;">
+            <img id="tabPreviewImg" style="max-width:100%; max-height:190px; cursor:zoom-in;" onclick="this.style.transform=this.style.transform?'':'scale(1.7)'">
+          </div>
+          <div style="display:flex; gap:5px; flex-wrap:wrap; margin-top:8px;">
+            <button type="button" class="chip-btn" onclick="quickItm('3x125A')">+ 3x125A</button>
+            <button type="button" class="chip-btn" onclick="quickItm('3x100A')">+ 3x100A</button>
+            <button type="button" class="chip-btn" onclick="quickItm('3x63A')">+ 3x63A</button>
+            <button type="button" class="chip-btn" onclick="quickItm('2x63A')">+ 2x63A</button>
+            <button type="button" class="chip-btn" onclick="quickItm('2x50A')">+ 2x50A</button>
+            <button type="button" class="chip-btn" onclick="quickItm('2x40A')">+ 2x40A</button>
+          </div>
+        </div>
+
+        <div class="panel-box">
+          <h3>2. Alimentación y Medidor</h3>
+          <div class="g2-sm field">
+            <div><label>Alimentación</label>
+              <select id="tabSource" onchange="drawTab()">
+                <option value="MEDIDOR">Con Medidor Existente</option>
+                <option value="DIRECTA">Sin Medidor (Conexión Directa)</option>
+                <option value="POSTE_TRAFO">Poste Transformador (Sin Medidor)</option>
+              </select>
+            </div>
+            <div><label>Propietario</label><input type="text" id="tabOwner" value="TU" oninput="drawTab()"></div>
+          </div>
+          <div class="g2-sm field" style="margin-top:6px;">
+            <div><label>N° Suministro</label><input type="text" id="tabSerial" value="18211798" oninput="drawTab()"></div>
+            <div><label>Lectura kWh</label><input type="text" id="tabKwh" value="5321.6 KwH" oninput="drawTab()"></div>
+          </div>
+        </div>
+
+        <div class="panel-box">
+          <h3>3. Tablero Principal / Caja de Pase</h3>
+          <div class="g2-sm field">
+            <div><label>Nombre Tablero</label><input type="text" id="tabMain" value="Tablero PRINCIPAL TU" oninput="drawTab()"></div>
+            <div><label>ITM General</label><input type="text" id="tabItm" value="3x100A" oninput="drawTab()"></div>
+          </div>
+          <label style="display:flex; align-items:center; gap:6px; margin:8px 0; font-size:12px; font-weight:bold; color:#1d4ed8;">
+            <input type="checkbox" id="tabPassBox" onchange="drawTab()"> Usar como CAJA DE PASE
+          </label>
+          <div class="g3-sm field">
+            <div><label>Vrs</label><input type="text" id="vrs" value="218V" oninput="drawTab()"></div>
+            <div><label>Vst</label><input type="text" id="vst" value="216V" oninput="drawTab()"></div>
+            <div><label>Vrt</label><input type="text" id="vrt" value="219V" oninput="drawTab()"></div>
+          </div>
+          <div class="g3-sm field" style="margin-top:6px;">
+            <div><label>Ir</label><input type="text" id="ir" value="19.25A" oninput="drawTab()"></div>
+            <div><label>Is</label><input type="text" id="is" value="18.79A" oninput="drawTab()"></div>
+            <div><label>It</label><input type="text" id="it" value="0.0A" oninput="drawTab()"></div>
+          </div>
+        </div>
+
+        <div class="panel-box">
+          <h3>4. Derivaciones / Operadores</h3>
+          <div id="tabBranchesUI"></div>
+          <button type="button" class="btn-action btn-secondary" style="width:100%;" onclick="addTabBranch()">+ Agregar Derivación</button>
+        </div>
+      </div>
+
+      <div class="canvas-stage" style="background:#cbd5e1; padding:12px; border-radius:10px; overflow:auto;">
+        <canvas id="cTab" width="1260" height="680"></canvas>
+      </div>
+    </div>
+  </section>
+  <!-- PESTAÑA 7: GENERADOR PANORÁMICO Y DIAGRAMA 360° -->
+  <section id="tabPano360" class="tab-panel" hidden>
+    <div class="panel-box">
+      <h3>1. Cargar Fotos y Configurar Unión</h3>
+      <div class="grid-form" style="margin-bottom:8px;">
+        <div class="field"><label for="panoFiles">Selecciona tus fotos secuenciales</label><input type="file" id="panoFiles" accept="image/*" multiple></div>
+        <div class="field"><label for="panoOv">Solapamiento (%)</label><input type="number" id="panoOv" value="25" min="0" max="50"></div>
+        <div class="field"><label for="panoQual">Calidad (%)</label><input type="number" id="panoQual" value="95" min="10" max="100"></div>
+      </div>
+      <button type="button" class="btn-action btn-primary" onclick="generar3Panoramicas()">Generar las 3 Panorámicas</button>
+      <span id="panoMsg" style="margin-left:10px; font-size:13px; font-weight:bold; color:#0369a1;"></span>
+    </div>
+
+    <div class="panel-box">
+      <h3>2. Visor Interactivo 360° (Arrastra con el mouse)</h3>
+      <div class="canvas-wrap" style="background:#0f172a;">
+        <canvas id="c360" width="960" height="460" style="cursor:grab; background:#0f172a;"></canvas>
+      </div>
+    </div>
+
+    <div class="pano-grid-cards">
+      <div class="panel-box">
+        <h3>3. Foto Completa (Todas las fotos unidas)</h3>
+        <canvas id="cPanoFullView" width="600" height="220" style="width:100%;"></canvas>
+        <button type="button" class="btn-action btn-primary" style="width:100%; margin-top:8px;" onclick="descargarPanoTipo('FULL')">Descargar Foto Completa (360°)</button>
+      </div>
+      <div class="panel-box">
+        <h3>4. Primera Mitad (0° - 180°)</h3>
+        <canvas id="cPanoHalf1" width="450" height="220" style="width:100%;"></canvas>
+        <button type="button" class="btn-action btn-secondary" style="width:100%; margin-top:8px;" onclick="descargarPanoTipo('HALF1')">Descargar Primera Mitad</button>
+      </div>
+      <div class="panel-box">
+        <h3>5. Segunda Mitad (180° - 360°)</h3>
+        <canvas id="cPanoHalf2" width="450" height="220" style="width:100%;"></canvas>
+        <button type="button" class="btn-action btn-secondary" style="width:100%; margin-top:8px;" onclick="descargarPanoTipo('HALF2')">Descargar Segunda Mitad</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="app.js" defer></script>
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+  const origDibujarTabActiva = window.dibujarTabActiva;
+  window.dibujarTabActiva = function(tabId) {
+    if (typeof origDibujarTabActiva === "function") origDibujarTabActiva(tabId);
+    if (tabId === "tabTableros") drawTab();
+  };
+  renderTabBranches();
+  document.fonts.ready.then(() => drawTab());
+});
+
+function syncExtraTabs() { drawTab(); }
+
+let tabPhotos = [], tabBranches = [
+  { name: 'Tablero CLARO', itm: '3x50A', eq: 'EQUIPOS CLARO', eqItm: '2x40A', ir: '12.1A', is: '15.0A', it: '11.8A' },
+  { name: 'Tablero ENTEL', itm: '3x63A', eq: 'EQUIPOS ENTEL', eqItm: '2x40A', ir: '24.1A', is: '23.1A', it: '20.2A' }
+];
+
+document.getElementById('tabPhotoIn')?.addEventListener('change', (e) => {
+  const files = Array.from(e.target.files); if (!files.length) return;
+  tabPhotos = []; const tabs = document.getElementById('tabPhotoTabs'); tabs.innerHTML = '';
+  files.forEach((f, idx) => {
+    const r = new FileReader();
+    r.onload = (ev) => {
+      tabPhotos.push(ev.target.result);
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'chip-btn'; b.textContent = `Foto ${idx + 1}`;
+      b.onclick = () => { document.getElementById('tabPreviewImg').src = tabPhotos[idx]; document.getElementById('tabPhotoBox').style.display = 'block'; };
+      tabs.appendChild(b); if (idx === 0) b.click();
+    };
+    r.readAsDataURL(f);
+  });
+});
+
+function quickItm(amp) {
+  tabBranches.push({ name: 'TABLERO OPERADOR', itm: amp, eq: 'EQUIPOS', eqItm: '2x40A', ir: '10.0A', is: '10.2A', it: '0.0A' });
+  renderTabBranches(); drawTab();
+}
+
+function applyTabPreset(t) {
+  if (t === 'MED_OP') {
+    document.getElementById('tabSource').value = 'MEDIDOR'; document.getElementById('tabOwner').value = 'ENTEL';
+    document.getElementById('tabPassBox').checked = false; document.getElementById('tabMain').value = 'Tablero OPERADOR ENTEL (Indep.)';
+    document.getElementById('tabItm').value = '3x63A';
+    tabBranches = [{ name: 'EQUIPOS ENTEL', itm: '2x40A', eq: 'RECTIFICADOR', eqItm: '', ir: '14.5A', is: '14.9A', it: '0.0A' }];
+  } else if (t === 'CAJA_PASE') {
+    document.getElementById('tabSource').value = 'MEDIDOR'; document.getElementById('tabOwner').value = 'CLARO';
+    document.getElementById('tabPassBox').checked = true; document.getElementById('tabMain').value = 'Tablero PRINCIPAL (CAJA DE PASE)';
+    tabBranches = [{ name: 'Tablero OPERADOR CLARO', itm: '', eq: 'EQUIPOS CLARO', eqItm: '2x63A', ir: '15.8A', is: '16.2A', it: '0.0A' }];
+  } else if (t === 'POSTE_TRAFO') {
+    document.getElementById('tabSource').value = 'POSTE_TRAFO'; document.getElementById('tabOwner').value = 'TU';
+    document.getElementById('tabPassBox').checked = false; document.getElementById('tabMain').value = 'Tablero PRINCIPAL TU';
+    document.getElementById('tabItm').value = '3x125A';
+    tabBranches = [
+      { name: 'Tablero TELEFONICA', itm: '3x100A', eq: 'EQUIPOS TELEFONICA', eqItm: '2x63A', ir: '20.1A', is: '19.5A', it: '0.0A' },
+      { name: 'Tablero CLARO', itm: '3x100A', eq: 'EQUIPOS CLARO', eqItm: '2x80A', ir: '11.8A', is: '12.1A', it: '0.0A' }
+    ];
+  } else {
+    document.getElementById('tabSource').value = 'MEDIDOR'; document.getElementById('tabOwner').value = 'TU';
+    document.getElementById('tabPassBox').checked = false; document.getElementById('tabMain').value = 'Tablero PRINCIPAL TU';
+    document.getElementById('tabItm').value = '3x100A';
+    tabBranches = [
+      { name: 'Tablero CLARO', itm: '3x50A', eq: 'EQUIPOS CLARO', eqItm: '2x40A', ir: '12.1A', is: '15.0A', it: '11.8A' },
+      { name: 'Tablero ENTEL', itm: '3x63A', eq: 'EQUIPOS ENTEL', eqItm: '2x40A', ir: '24.1A', is: '23.1A', it: '20.2A' }
+    ];
+  }
+  renderTabBranches(); drawTab();
+}
+
+function renderTabBranches() {
+  const box = document.getElementById('tabBranchesUI'); if (!box) return; box.innerHTML = '';
+  tabBranches.forEach((b, i) => {
+    const d = document.createElement('div');
+    d.style.cssText = 'background:#fff; border:1px solid #cbd5e1; border-left:4px solid #1d4ed8; border-radius:6px; padding:8px; margin-bottom:8px;';
+    d.innerHTML = `<div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:12px; font-weight:bold;"><span>Derivación #${i+1}</span><button type="button" class="btn-danger-sm" onclick="tabBranches.splice(${i},1); renderTabBranches(); drawTab();">Quitar</button></div>
+    <div class="g2-sm field"><input type="text" value="${b.name}" oninput="tabBranches[${i}].name=this.value; drawTab();"><input type="text" value="${b.itm}" oninput="tabBranches[${i}].itm=this.value; drawTab();"></div>
+    <div class="g2-sm field" style="margin-top:5px;"><input type="text" value="${b.eq}" oninput="tabBranches[${i}].eq=this.value; drawTab();"><input type="text" value="${b.eqItm}" oninput="tabBranches[${i}].eqItm=this.value; drawTab();"></div>
+    <div class="g3-sm field" style="margin-top:5px;"><input type="text" value="${b.ir || '0.0A'}" oninput="tabBranches[${i}].ir=this.value; drawTab();"><input type="text" value="${b.is || '0.0A'}" oninput="tabBranches[${i}].is=this.value; drawTab();"><input type="text" value="${b.it || '0.0A'}" oninput="tabBranches[${i}].it=this.value; drawTab();"></div>`;
+    box.appendChild(d);
+  });
+}
+
+function addTabBranch() {
+  tabBranches.push({ name: 'TABLERO ENTEL', itm: '2x63A', eq: 'EQUIPOS ENTEL', eqItm: '2x40A', ir: '11.5A', is: '12.0A', it: '0.0A' });
+  renderTabBranches(); drawTab();
+}
+function mLine(ctx, x1, y1, x2, y2, col = '#18181b', w = 2.6) {
+  const j = () => (Math.random() - 0.5) * 1.1;
+  ctx.save(); ctx.strokeStyle = col; ctx.lineWidth = w; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(x1 + j(), y1 + j()); ctx.lineTo((x1 + x2) / 2 + j(), (y1 + y2) / 2 + j()); ctx.lineTo(x2 + j(), y2 + j()); ctx.stroke(); ctx.restore();
+}
+function mRect(ctx, x, y, w, h, col = '#18181b') {
+  mLine(ctx, x - 3, y, x + w + 3, y, col); mLine(ctx, x + w, y - 3, x + w, y + h + 3, col);
+  mLine(ctx, x + w + 3, y + h, x - 3, y + h, col); mLine(ctx, x, y + h + 3, x, y - 3, col);
+}
+function mTxt(ctx, t, x, y, sz = 18, col = '#18181b', al = 'center', b = false) {
+  if (!t) return;
+  ctx.save(); ctx.font = `${b ? '700' : '400'} ${sz}px 'Kalam', cursive`; ctx.fillStyle = col; ctx.textAlign = al; ctx.textBaseline = 'middle'; ctx.fillText(t, x, y); ctx.restore();
+}
+function mBreaker(ctx, x, y, amp) {
+  mLine(ctx, x - 22, y, x, y); mLine(ctx, x - 14, y - 15, x, y); mLine(ctx, x, y, x, y - 16); mLine(ctx, x, y - 16, x + 12, y - 16); mLine(ctx, x + 12, y - 16, x + 12, y); mLine(ctx, x + 12, y, x + 22, y);
+  ctx.save(); ctx.strokeStyle = '#18181b'; ctx.lineWidth = 2.6; ctx.beginPath(); ctx.arc(x + 28, y - 10, 6, Math.PI, 0); ctx.stroke(); ctx.restore();
+  mLine(ctx, x + 34, y - 10, x + 34, y); mLine(ctx, x + 34, y, x + 52, y);
+  if (amp) mTxt(ctx, amp, x + 16, y + 23, 18, '#c81e1e', 'center', true);
+}
+function mSlashes(ctx, x, y, isTri) {
+  const c = isTri ? 3 : 2;
+  for (let i = 0; i < c; i++) { const sx = x - ((c - 1) * 7) / 2 + i * 7; mLine(ctx, sx - 5, y - 11, sx + 5, y + 11, '#1d4ed8', 2); }
+}
+
+function drawTab() {
+  const c = document.getElementById('cTab'); if (!c) return; const ctx = c.getContext('2d');
+  const tituloSitio = (document.getElementById('sitio')?.value || 'SITIO').trim().toUpperCase();
+  c.height = Math.max(660, 260 + tabBranches.length * 165);
+  ctx.fillStyle = '#fdfdfb'; ctx.fillRect(0, 0, c.width, c.height);
+  ctx.strokeStyle = 'rgba(148,163,184,0.22)'; ctx.lineWidth = 1;
+  for (let x = 0; x < c.width; x += 24) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, c.height); ctx.stroke(); }
+  for (let y = 0; y < c.height; y += 24) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(c.width, y); ctx.stroke(); }
+
+  const y0 = 225, src = document.getElementById('tabSource').value;
+  mTxt(ctx, `DIAGRAMA UNIFILAR DEL SITE "${tituloSitio}"`, c.width / 2, 35, 23, '#0f172a', 'center', true);
+  mLine(ctx, c.width / 2 - 230, 50, c.width / 2 + 230, 50);
+
+  if (src === 'MEDIDOR') {
+    mTxt(ctx, 'Medidor', 110, 90, 19, '#18181b', 'center', true); mTxt(ctx, document.getElementById('tabOwner').value, 110, 112, 19, '#1d4ed8', 'center', true);
+    mRect(ctx, 50, 130, 120, 45); mTxt(ctx, document.getElementById('tabSerial').value, 110, 153, 16, '#18181b', 'center', true);
+    mRect(ctx, 50, 182, 120, 125); mBreaker(ctx, 90, y0, '');
+    mRect(ctx, 68, 258, 84, 32); mTxt(ctx, document.getElementById('tabKwh').value, 110, 275, 15, '#18181b', 'center', true);
+    mLine(ctx, 142, y0, 300, y0); mSlashes(ctx, 225, y0, true);
+  } else if (src === 'POSTE_TRAFO') {
+    mLine(ctx, 85, y0 - 85, 85, y0 + 85, '#18181b', 3.4); mLine(ctx, 57, y0 - 72, 113, y0 - 72, '#18181b', 3);
+    ctx.strokeStyle = '#1d4ed8'; ctx.lineWidth = 2.6; ctx.beginPath(); ctx.arc(111, y0 - 12, 18, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(111, y0 + 12, 18, 0, Math.PI * 2); ctx.stroke();
+    mLine(ctx, 129, y0, 300, y0); mSlashes(ctx, 240, y0, true);
+    mTxt(ctx, 'POSTE', 107, y0 - 92, 16, '#18181b', 'center', true);
+    mTxt(ctx, 'Sin medidor / Conexión directa', 160, y0 + 50, 14, '#c81e1e', 'center', true);
+    mTxt(ctx, 'TRANSFORMADOR', 160, y0 + 68, 15, '#c81e1e', 'center', true);
+  } else {
+    mLine(ctx, 40, y0, 300, y0); mSlashes(ctx, 245, y0, true);
+    mTxt(ctx, 'Medidor no ubicado,', 140, y0 - 32, 16, '#c81e1e', 'center', true); mTxt(ctx, 'conexión directa', 140, y0 - 13, 16, '#c81e1e', 'center', true);
+  }
+
+  const boxH = Math.max(235, 135 + tabBranches.length * 150);
+  mTxt(ctx, document.getElementById('tabMain').value, 470, 98, 20, '#18181b', 'center', true); mRect(ctx, 300, 120, 340, boxH);
+  const busX = 505;
+  if (document.getElementById('tabPassBox').checked) {
+    mLine(ctx, 300, y0, busX, y0, '#18181b', 2.8); mTxt(ctx, 'CAJA DE PASE', 400, y0 - 25, 17, '#c81e1e', 'center', true);
+  } else {
+    mTxt(ctx, 'Interruptor General', 385, 165, 16, '#18181b', 'center', true);
+    mBreaker(ctx, 365, y0, document.getElementById('tabItm').value); mLine(ctx, 417, y0, busX, y0);
+  }
+  mTxt(ctx, `Vrs=${document.getElementById('vrs').value}`, 318, y0 + 55, 15, '#18181b', 'left');
+  mTxt(ctx, `Vst=${document.getElementById('vst').value}`, 318, y0 + 75, 15, '#18181b', 'left');
+  mTxt(ctx, `Vrt=${document.getElementById('vrt').value}`, 318, y0 + 95, 15, '#18181b', 'left');
+  mTxt(ctx, `Ir=${document.getElementById('ir').value}`, 420, y0 + 55, 15, '#1d4ed8', 'left');
+  mTxt(ctx, `Is=${document.getElementById('is').value}`, 420, y0 + 75, 15, '#1d4ed8', 'left');
+  mTxt(ctx, `It=${document.getElementById('it').value}`, 420, y0 + 95, 15, '#1d4ed8', 'left');
+
+  if (tabBranches.length > 0) {
+    if (tabBranches.length > 1) mLine(busX, y0, busX, y0 + (tabBranches.length - 1) * 150, '#18181b', 3.2);
+    tabBranches.forEach((b, i) => {
+      const by = y0 + i * 150;
+      if (b.itm) { mLine(busX, by, 535, by); mBreaker(ctx, 555, by, b.itm); mLine(ctx, 607, by, 760, by); } else { mLine(busX, by, 760, by); }
+      mSlashes(ctx, 690, by, (b.itm || '').startsWith('3'));
+      mTxt(ctx, `Ir=${b.ir || '0.0A'}  Is=${b.is || '0.0A'}  It=${b.it || '0.0A'}`, 705, by + 26, 14, '#1d4ed8', 'center');
+      mTxt(ctx, b.name, 880, by - 64, 17, '#18181b', 'center', true); mRect(ctx, 760, by - 50, 460, 108);
+      if (b.eqItm) { mLine(ctx, 760, by, 815, by); mBreaker(ctx, 835, by, b.eqItm); mLine(ctx, 887, by, 1010, by); } else { mLine(ctx, 760, by, 1010, by); }
+      mRect(ctx, 1010, by - 24, 185, 48, '#1d4ed8'); mTxt(ctx, b.eq || b.name, 1102, by, 16, '#1d4ed8', 'center', true);
+    });
+  }
+}
+
+let panoImgs = [], panoFull = document.createElement('canvas'), yaw = 0, pitch = 0, fov = 85, drag360 = false, lx = 0, ly = 0;
+
+document.getElementById('panoFiles')?.addEventListener('change', (e) => {
+  const files = Array.from(e.target.files).sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+  if (!files.length) return;
+  panoImgs = new Array(files.length); let loaded = 0;
+  document.getElementById('panoMsg').textContent = `Cargando ${files.length} fotos...`;
+  files.forEach((f, idx) => {
+    const im = new Image();
+    im.onload = () => { panoImgs[idx] = im; loaded++; if (loaded === files.length) generar3Panoramicas(); };
+    im.src = URL.createObjectURL(f);
+  });
+});
+
+function generar3Panoramicas() {
+  if (!panoImgs.length) return;
+  const ovRatio = Math.min(0.45, Math.max(0, (parseInt(document.getElementById('panoOv').value) || 0) / 100));
+  const firstImg = panoImgs[0];
+  const targetH = Math.min(1200, firstImg.naturalHeight || 900);
+  const scale = targetH / (firstImg.naturalHeight || 900);
+  const imgW = Math.round((firstImg.naturalWidth || 700) * scale);
+  const ovPx = Math.round(imgW * ovRatio);
+  const stepX = imgW - ovPx;
+  const totalW = imgW + stepX * (panoImgs.length - 1);
+
+  panoFull.width = totalW; panoFull.height = targetH;
+  const pCtx = panoFull.getContext('2d');
+  pCtx.clearRect(0, 0, totalW, targetH);
+
+  panoImgs.forEach((im, i) => {
+    const drawX = i * stepX;
+    if (i === 0 || ovPx <= 4) {
+      pCtx.drawImage(im, drawX, 0, imgW, targetH);
+    } else {
+      const tempC = document.createElement('canvas'); tempC.width = imgW; tempC.height = targetH;
+      const tCtx = tempC.getContext('2d'); tCtx.drawImage(im, 0, 0, imgW, targetH);
+      tCtx.globalCompositeOperation = 'destination-in';
+      const grad = tCtx.createLinearGradient(0, 0, ovPx, 0);
+      grad.addColorStop(0, 'rgba(0,0,0,0)'); grad.addColorStop(1, 'rgba(0,0,0,1)');
+      tCtx.fillStyle = grad; tCtx.fillRect(0, 0, ovPx, targetH);
+      tCtx.fillStyle = '#000'; tCtx.fillRect(ovPx, 0, imgW - ovPx, targetH);
+      pCtx.drawImage(tempC, drawX, 0);
+    }
+  });
+
+  const cFull = document.getElementById('cPanoFullView');
+  cFull.getContext('2d').clearRect(0, 0, cFull.width, cFull.height);
+  cFull.getContext('2d').drawImage(panoFull, 0, 0, cFull.width, cFull.height);
+
+  const halfW = Math.floor(totalW / 2);
+  const cH1 = document.getElementById('cPanoHalf1');
+  cH1.getContext('2d').clearRect(0, 0, cH1.width, cH1.height);
+  cH1.getContext('2d').drawImage(panoFull, 0, 0, halfW, targetH, 0, 0, cH1.width, cH1.height);
+
+  const cH2 = document.getElementById('cPanoHalf2');
+  cH2.getContext('2d').clearRect(0, 0, cH2.width, cH2.height);
+  cH2.getContext('2d').drawImage(panoFull, halfW, 0, halfW, targetH, 0, 0, cH2.width, cH2.height);
+
+  document.getElementById('panoMsg').textContent = `¡3 panorámicas generadas (${panoImgs.length} fotos)!`;
+  yaw = 0; pitch = 0; render360();
+}
+
+const c360 = document.getElementById('c360'), ctx360 = c360?.getContext('2d');
+c360?.addEventListener('mousedown', e => { drag360 = true; lx = e.clientX; ly = e.clientY; });
+window.addEventListener('mouseup', () => drag360 = false);
+c360?.addEventListener('mousemove', e => {
+  if (!drag360 || !panoImgs.length) return;
+  yaw -= (e.clientX - lx) * 0.3; pitch = Math.max(-55, Math.min(55, pitch - (e.clientY - ly) * 0.3));
+  lx = e.clientX; ly = e.clientY; render360();
+});
+c360?.addEventListener('wheel', e => {
+  if (!panoImgs.length) return; e.preventDefault();
+  fov = Math.max(40, Math.min(105, fov + (e.deltaY > 0 ? 5 : -5))); render360();
+});
+
+function render360() {
+  if (!panoImgs.length || !c360) return;
+  const w = c360.width, h = c360.height, pw = panoFull.width, ph = panoFull.height;
+  const src = panoFull.getContext('2d').getImageData(0, 0, pw, ph).data;
+  const out = ctx360.createImageData(w, h), dst = out.data;
+  const f = 0.5 * w / Math.tan((fov * Math.PI) / 360), pR = pitch * Math.PI / 180, yR = yaw * Math.PI / 180;
+  const cP = Math.cos(pR), sP = Math.sin(pR), cY = Math.cos(yR), sY = Math.sin(yR);
+
+  for (let py = 0; py < h; py += 2) {
+    for (let px = 0; px < w; px += 2) {
+      const dx = px - w / 2, dy = py - h / 2;
+      const y1 = dy * cP - f * sP, z1 = dy * sP + f * cP;
+      const x2 = dx * cY + z1 * sY, z2 = -dx * sY + z1 * cY;
+      const n = Math.hypot(x2, y1, z2);
+      const lon = Math.atan2(x2 / n, z2 / n), lat = Math.asin(Math.max(-1, Math.min(1, y1 / n)));
+      let u = Math.floor(((lon / (2 * Math.PI)) + 0.5) * pw) % pw; if (u < 0) u += pw;
+      const v = Math.max(0, Math.min(ph - 1, Math.floor(((lat / (Math.PI * 0.65)) + 0.5) * ph)));
+      const s = (v * pw + u) * 4;
+      for (let oy = 0; oy < 2 && py + oy < h; oy++) for (let ox = 0; ox < 2 && px + ox < w; ox++) {
+        const d = ((py + oy) * w + (px + ox)) * 4; dst[d] = src[s]; dst[d+1] = src[s+1]; dst[d+2] = src[s+2]; dst[d+3] = 255;
+      }
+    }
+  }
+  ctx360.putImageData(out, 0, 0);
+}
+
+function descargarPanoTipo(tipo) {
+  if (!panoImgs.length) return alert('Primero carga las fotos secuenciales.');
+  const q = (parseInt(document.getElementById('panoQual').value) || 95) / 100;
+  const slug = (document.getElementById('sitio')?.value || 'SITIO').trim().toUpperCase().replace(/[^A-Z0-9_-]+/g, '_');
+  const outC = document.createElement('canvas'), pw = panoFull.width, ph = panoFull.height;
+  if (tipo === 'FULL') {
+    outC.width = pw; outC.height = ph; outC.getContext('2d').drawImage(panoFull, 0, 0);
+  } else {
+    const halfW = Math.floor(pw / 2);
+    outC.width = halfW; outC.height = ph;
+    outC.getContext('2d').drawImage(panoFull, tipo === 'HALF1' ? 0 : halfW, 0, halfW, ph, 0, 0, halfW, ph);
+  }
+  const a = document.createElement('a');
+  a.download = `PANORAMICA_${tipo}_${slug}.jpg`;
+  a.href = outC.toDataURL('image/jpeg', q);
+  a.click();
+}
+</script>
+</body>
+</html>
